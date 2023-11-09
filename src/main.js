@@ -14,7 +14,7 @@ const vm = createApp({
     methods: {
         createWebSocket() {
             return new Promise((resolve, reject) => {
-                this.ws = new WebSocket("wss://buaa-jj.cn/websocket")
+                this.ws = new WebSocket("wss://www.buaa-jj.cn/websocket")
                 this.ws.onmessage = (event) => {
                     const body = JSON.parse(event.data)
                     const data = body.data;
