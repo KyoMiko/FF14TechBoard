@@ -1,9 +1,9 @@
 const {createApp} = Vue;
+window.connectionList= {}
 
 const vm = createApp({
     data() {
         return {
-            connectionList: {},
             host: true,
             selfNum: "",
             roomNum: "",
@@ -34,8 +34,9 @@ const vm = createApp({
                             });
                             connection.ondatachannel = (event) => {
                                 const channel = event.channel;
-                                channel.onmessage = this.handleReceive
-                                this.connectionList[callFrom].channel = channel;
+                                if(channel) {
+                                    connectionList[callFrom].channel = channel
+                                }
                             }
                             connection.onicecandidate = (event) => {
                                 if (event.candidate) {
@@ -49,7 +50,7 @@ const vm = createApp({
                                     }))
                                 }
                             }
-                            this.connectionList[callFrom] = {peer: connection};
+                            connectionList[callFrom] = {peer: connection};
                             connection.setRemoteDescription(data.sdp).then(() => {
                                 connection.createAnswer().then((desc) => {
                                     connection.setLocalDescription(desc).then(() => {
@@ -67,15 +68,15 @@ const vm = createApp({
                             break;
                         case "answer":
                             const answerFrom = data.from;
-                            if (this.connectionList[answerFrom]) {
-                                const connection = this.connectionList[answerFrom].peer;
+                            if (connectionList[answerFrom]) {
+                                const connection = connectionList[answerFrom].peer;
                                 connection.setRemoteDescription(data.sdp)
                             }
                             break;
                         case "ice":
                             const iceFrom = data.from;
-                            if (this.connectionList[iceFrom]) {
-                                const connection = this.connectionList[iceFrom].peer;
+                            if (connectionList[iceFrom]) {
+                                const connection = connectionList[iceFrom].peer;
                                 connection.addIceCandidate(data.candidate)
                             }
                             break;
@@ -115,7 +116,7 @@ const vm = createApp({
                     ]
                 }
             )
-            const channel = peer.createDataChannel("sendChannel");
+            const channel = peer.createDataChannel("channel");
             channel.onopen = () => {
                 channel.send("Hello World!")
             }
@@ -143,22 +144,23 @@ const vm = createApp({
                     }))
                 })
             })
-            this.connectionList[roomNum] = {
+            connectionList[roomNum] = {
                 peer: peer,
                 channel: channel
             };
         },
         closeAllPeer() {
-            for (const key in this.connectionList) {
-                const connection = this.connectionList[key];
+            for (const key in connectionList) {
+                const connection = connectionList[key];
                 connection.channel.close();
                 connection.peer.close();
             }
-            this.connectionList = {};
+            connectionList = {};
         },
         sendMessage() {
-            for (const key in this.connectionList) {
-                const connection = this.connectionList[key];
+            debugger
+            for (const key in connectionList) {
+                const connection = connectionList[key];
                 connection.channel.send(this.data)
             }
         },
