@@ -1,5 +1,5 @@
-const {createApp} = Vue;
-window.connectionList= {}
+const { createApp } = Vue;
+window.connectionList = {}
 
 const vm = createApp({
     data() {
@@ -19,7 +19,7 @@ const vm = createApp({
                     const body = JSON.parse(event.data)
                     const data = body.data;
                     switch (body.type) {
-                        case "connect" :
+                        case "connect":
                             this.selfNum = data.num
                             resolve()
                             break;
@@ -28,30 +28,32 @@ const vm = createApp({
                             const connection = new RTCPeerConnection({
                                 iceServers: [
                                     {
-                                        urls: "stun:39.104.26.107:3478"
+                                        urls: "turn:39.104.26.107:3478",
+                                        username: "admin",
+                                        credential: "admin"
                                     }
                                 ]
                             });
                             connection.ondatachannel = (event) => {
                                 const channel = event.channel;
-                                if(channel) {
+                                if (channel) {
                                     channel.onmessage = this.handleReceive
                                     connectionList[callFrom].channel = channel
                                 }
                             }
-                            connectionList[callFrom] = {peer: connection};
-                            
-                            let candidate = new Promise((resolve,reject)=>{
+                            connectionList[callFrom] = { peer: connection };
+
+                            let candidate = new Promise((resolve, reject) => {
                                 let candidateList = []
                                 connection.onicecandidate = (event) => {
                                     if (event.candidate) {
                                         candidateList.push(event.candidate)
-                                    }else{
+                                    } else {
                                         resolve(candidateList)
                                     }
                                 }
                             })
-                            let answer = new Promise((resolve,reject)=>{
+                            let answer = new Promise((resolve, reject) => {
                                 connection.setRemoteDescription(data.sdp).then(() => {
                                     connection.createAnswer().then((desc) => {
                                         connection.setLocalDescription(desc).then(() => {
@@ -61,7 +63,7 @@ const vm = createApp({
                                 })
                             })
 
-                            Promise.all([answer,candidate]).then(result=>{
+                            Promise.all([answer, candidate]).then(result => {
                                 this.ws.send(JSON.stringify({
                                     type: 'answer',
                                     data: {
@@ -131,32 +133,34 @@ const vm = createApp({
                 {
                     iceServers: [
                         {
-                            urls: "stun:39.104.26.107:3478"
+                            urls: "turn:39.104.26.107:3478",
+                            username: "admin",
+                            credential: "admin"
                         }
                     ]
                 }
             )
             const channel = peer.createDataChannel("channel");
             channel.onmessage = this.handleReceive
-            let offer = new Promise((resolve,reject)=>{
+            let offer = new Promise((resolve, reject) => {
                 peer.createOffer().then((desc) => {
                     peer.setLocalDescription(desc).then(() => {
                         resolve(desc)
                     })
                 })
             })
-            let candidate = new Promise((resolve,reject)=>{
+            let candidate = new Promise((resolve, reject) => {
                 let candidateList = []
                 peer.onicecandidate = (event) => {
                     if (event.candidate) {
                         candidateList.push(event.candidate)
-                    }else{
+                    } else {
                         resolve(candidateList)
                     }
                 }
             })
 
-            Promise.all([offer,candidate]).then((result)=>{
+            Promise.all([offer, candidate]).then((result) => {
                 this.ws.send(JSON.stringify({
                     type: 'call',
                     data: {
