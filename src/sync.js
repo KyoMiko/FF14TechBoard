@@ -33,6 +33,7 @@ export function syncScene(data) {
             y: size.height / 2
         })
         layer.addChild(background, -1)
+        cc.eventManager.addListener(listener.touchEmptyListener.clone(), background)
         if (backgroundInfo.texture.type === "base64") {
             cc.loader.loadImg(backgroundInfo.texture.data, {isCrossOrigin: false}, function (err, img) {
                 const texture = new cc.Texture2D();
@@ -85,6 +86,7 @@ export function syncScene(data) {
             player.setScale(scale)
             layer.addChild(player, 0)
             game.playerList[tag] = player
+            cc.eventManager.addListener(listener.moveItemListener.clone(), player)
         }
         game.calculateMechanism()
         updateSyncing()
