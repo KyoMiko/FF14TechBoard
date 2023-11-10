@@ -4,14 +4,59 @@ export default class WebrtcClient {
     uid;
     connectionList = {};
     iceServers;
+    timeout = 3000;
+    timeoutObj = null;
+    serverTimeoutObj = null;
+    lockReconnect = false;
     wsServer;
+    keepConnect = true;
 
     constructor(iceServers, wsServer) {
         this.iceServers = iceServers
         this.wsServer = wsServer
-        this.ws = new WebSocket(wsServer)
+        this.createWebSocket()
+        window.onbeforeunload = () => {
+            this.keepConnect = false;
+            this.ws.close();
+        }
+    }
+
+    createWebSocket() {
+        this.ws = new WebSocket(this.wsServer)
+        this.ws.onclose = this.reconnect
         this.ws.onopen = this.onWSOpen
         this.ws.onmessage = this.onWSMessage
+    }
+
+    reconnect = () => {
+        this.resetHeartbeat()
+        if (this.keepConnect && !this.lockReconnect) {
+            this.lockReconnect = true
+            setTimeout(() => {
+                this.createWebSocket()
+                this.lockReconnect = false;
+            }, 1000)
+        }
+    }
+
+    resetHeartbeat() {
+        this.timeoutObj && clearTimeout(this.timeoutObj)
+        this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj)
+    }
+
+    heartbeat() {
+        this.resetHeartbeat()
+        this.timeoutObj = setTimeout(() => {
+            if (this.keepConnect) {
+                this.ws.send(JSON.stringify({
+                    type: "heartbeat",
+                    from: this.uid
+                }))
+                this.serverTimeoutObj = setTimeout(() => {
+                    this.ws.close();
+                }, this.timeout)
+            }
+        }, this.timeout)
     }
 
     onReady = () => {
@@ -42,9 +87,6 @@ export default class WebrtcClient {
             return
         }
 
-        if (this.ws.readyState === 3) {
-            this.ws = new WebSocket(this.wsServer)
-        }
         updateHost(0)
         const peer = new RTCPeerConnection(
             {
@@ -176,9 +218,11 @@ export default class WebrtcClient {
         this.ws.send(JSON.stringify({
             type: 'connect'
         }))
+        this.heartbeat();
     }
 
     onWSMessage = (event) => {
+        this.heartbeat();
         const body = JSON.parse(event.data)
         const data = body.data;
         switch (body.type) {

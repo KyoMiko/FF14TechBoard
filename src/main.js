@@ -66,6 +66,15 @@ const vm = createApp({
                 this.selfNum = this.webrtc.uid
             }
         },
+        releaseConnection() {
+            if (host !== -1) {
+                this.leaveConnection();
+            }
+            this.selfNum = ""
+            this.webrtc.keepConnect = false;
+            this.webrtc.ws.close()
+            this.webrtc = null
+        },
         joinConnection() {
             this.init = false
             this.webrtc.onReceive = this.handleReceive

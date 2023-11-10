@@ -111,7 +111,8 @@
         </el-tooltip>
         <el-input disabled v-model="selfNum"></el-input>
         <el-input v-model="roomNum"></el-input>
-        <el-button :disabled="webrtc !== null" @click="createConnection">连接</el-button>
+        <el-button @click="createConnection" v-if="webrtc === null">连接</el-button>
+        <el-button @click="releaseConnection" v-if="webrtc !== null">离线</el-button>
         <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
         <el-button :disabled="webrtc === null || host === -1" @click="leaveConnection">断开</el-button>
         <el-upload :auto-upload="false" :on-change="uploadFile" :show-file-list="false" action="#">
