@@ -53,7 +53,7 @@ const localLayer = cc.Layer.extend({
 
         window.panel.target = {};
         window.game.layer = this;
-        window.game.moveableList = {};
+        window.game.targetList = {};
         window.game.mechanismList = {};
         window.game.playerList = {};
 
@@ -74,7 +74,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.warrior
             },
-            size: 1
+            size: 2
         })
 
         let mtSize = mt.getBoundingBox();
@@ -97,7 +97,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.paladin
             },
-            size: 1
+            size: 2
         })
         st.setScale(scale)
         this.addChild(st, 0)
@@ -116,7 +116,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.whitemage
             },
-            size: 1
+            size: 2
         })
         h1.setScale(scale)
         this.addChild(h1, 0)
@@ -135,7 +135,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.scholar
             },
-            size: 1
+            size: 2
         })
         h2.setScale(scale)
         this.addChild(h2, 0)
@@ -154,7 +154,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.dragoon
             },
-            size: 1
+            size: 2
         })
         d1.setScale(scale)
         this.addChild(d1, 0)
@@ -173,7 +173,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.samurai
             },
-            size: 1
+            size: 2
         })
         d2.setScale(scale)
         this.addChild(d2, 0)
@@ -192,7 +192,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.bard
             },
-            size: 1
+            size: 2
         })
         d3.setScale(scale)
         this.addChild(d3, 0)
@@ -212,7 +212,7 @@ const localLayer = cc.Layer.extend({
                 type: "url",
                 data: res.summoner
             },
-            size: 1
+            size: 2
         })
         d4.setScale(scale)
         this.addChild(d4, 0)
@@ -228,15 +228,6 @@ const localLayer = cc.Layer.extend({
                 if (panel.target.type === "new_target") {
                     const data = panel.target;
                     const touchLocation = touch.getLocation();
-                    for (const tag in game.moveableList) {
-                        const sprite = game.moveableList[tag];
-                        const locationInNode = sprite.convertToNodeSpace(touchLocation);
-                        const s = sprite.getContentSize()
-                        const rect = cc.rect(0, 0, s.width, s.height)
-                        if (cc.rectContainsPoint(rect, locationInNode)) {
-                            return false;
-                        }
-                    }
 
                     const tag = Math.floor(Math.random() * 100000)
                     let target = new cc.Sprite(res.summoner);
@@ -245,6 +236,9 @@ const localLayer = cc.Layer.extend({
                         y: touchLocation.y
                     })
                     target.setTag(tag)
+                    game.layer.addChild(target, 0)
+                    cc.eventManager.addListener(listener.moveItemListener.clone(), target)
+                    game.targetList[tag] = target
 
                     const icon = data.icon;
                     if (icon) {
@@ -261,11 +255,13 @@ const localLayer = cc.Layer.extend({
                             }
                             target.setUserData({
                                 texture: {
-                                    type: "img",
-                                    data: img
+                                    type: "base64",
+                                    data: icon
                                 },
-                                size: size ? size : 1
+                                size: size ? size : 2
                             })
+                            game.calculateMechanism()
+                            updateNeedUpdate()
                         });
                     } else {
                         target.setTexture(res.mechanism);
@@ -275,21 +271,16 @@ const localLayer = cc.Layer.extend({
                         } else {
                             target.setScale(game.iconSize / target.getBoundingBox().width)
                         }
-
                         target.setUserData({
                             texture: {
                                 type: "url",
                                 data: res.mechanism
                             },
-                            size: size ? size : 1
+                            size: size ? size : 2
                         })
+                        game.calculateMechanism()
+                        updateNeedUpdate()
                     }
-
-                    game.layer.addChild(target, 0)
-                    cc.eventManager.addListener(listener.moveItemListener.clone(), target)
-                    game.playerList[tag] = target
-                    game.calculateMechanism()
-                    updateNeedUpdate()
                 }
             }
         })
@@ -342,8 +333,8 @@ const localLayer = cc.Layer.extend({
             }
         })
 
-        cc.eventManager.addListener(listener.touchEmptyListener, background)
-        cc.eventManager.addListener(listener.moveItemListener, mt)
+        cc.eventManager.addListener(listener.touchEmptyListener.clone(), background)
+        cc.eventManager.addListener(listener.moveItemListener.clone(), mt)
         cc.eventManager.addListener(listener.moveItemListener.clone(), st)
         cc.eventManager.addListener(listener.moveItemListener.clone(), h1)
         cc.eventManager.addListener(listener.moveItemListener.clone(), h2)
