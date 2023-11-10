@@ -106,15 +106,17 @@
         <script cocos src="main.js"></script>
     </div>
     <div id="app" style="height: 100vh;width: 30vw;">
+        <el-tooltip :content="hostTip" :visible="host === 1?null:false">
+            <el-tag :type="mode.type">{{mode.text}}</el-tag>
+        </el-tooltip>
         <el-input disabled v-model="selfNum"></el-input>
         <el-input v-model="roomNum"></el-input>
-        <el-input v-model="data"></el-input>
-        <el-button @click="createConnection">创建</el-button>
-        <el-button @click="joinConnection">连接</el-button>
-        <el-button @click="sendMessage">发送</el-button>
+        <el-button :disabled="webrtc !== null" @click="createConnection">连接</el-button>
+        <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
+        <el-button :disabled="webrtc === null || host === -1" @click="leaveConnection">断开</el-button>
     </div>
 </div>
-<script src="src/main.js"></script>
+<script src="src/main.js" type="module"></script>
 </body>
 
 </html>
