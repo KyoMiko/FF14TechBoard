@@ -1,4 +1,5 @@
 import WebrtcClient from './webrtc.js'
+import { getCurrentData, syncScene } from "./sync.js";
 
 const {createApp} = Vue;
 
@@ -11,7 +12,11 @@ const vm = createApp({
             data: "",
             webrtc: null,
             host: -1,
-            people: 0
+            people: 0,
+            needUpdate: false,
+            updating: false,
+            syncing: false,
+            init: false
         }
     },
     computed: {
@@ -38,6 +43,18 @@ const vm = createApp({
             return this.people + "人已加入"
         }
     },
+    watch: {
+        needUpdate() {
+            if (this.host === 1 && this.needUpdate && !this.updating) {
+                this.syncState()
+            }
+        },
+        updating() {
+            if (this.host === 1 && this.needUpdate && !this.updating) {
+                this.syncState()
+            }
+        }
+    },
     methods: {
         createConnection() {
             this.webrtc = new WebrtcClient([{
@@ -50,6 +67,7 @@ const vm = createApp({
             }
         },
         joinConnection() {
+            this.init = false
             this.webrtc.onReceive = this.handleReceive
             ElNotification({
                 title: '尝试加入',
@@ -62,12 +80,36 @@ const vm = createApp({
         leaveConnection() {
             this.webrtc.leave()
         },
+        syncState() {
+            this.needUpdate = false
+            this.updating = true
+            let data = getCurrentData();
+            this.updating = false
+            this.webrtc.sendMessage(JSON.stringify({
+                type: "sync",
+                data: data
+            }))
+        },
         handleReceive(event) {
-            this.data = event.data;
+            const msg = JSON.parse(event.data);
+            const type = msg.type
+            if (type === "sync" && this.syncing === false) {
+                this.syncing = true
+                syncScene(msg.data)
+            }
+        },
+        uploadFile(file) {
+            const fileReader = new FileReader();
+            fileReader.readAsDataURL(file.raw);
+            fileReader.onload = () => {
+                panel.target.icon = fileReader.result
+                panel.target.type = "new_target"
+                this.$message({message: "上传素材成功", type: "success"})
+            }
         }
     },
     mounted() {
-        debugger
+        window.test = this
         window.ElNotification = this.$notify
         window.host = -1
         window.updateHost = (val) => {
@@ -82,6 +124,12 @@ const vm = createApp({
             } else if (val === 0) {
                 this.people = 0;
             }
+        };
+        window.updateNeedUpdate = () => {
+            this.needUpdate = true;
+        }
+        window.updateSyncing = () => {
+            this.syncing = false;
         }
     }
 })

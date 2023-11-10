@@ -27,7 +27,7 @@ window.listener = {}
 window.panel = {}
 window.panel.target = {}
 
-const HelloWorldLayer = cc.Layer.extend({
+const localLayer = cc.Layer.extend({
     sprite: null,
     ctor: function () {
         //////////////////////////////
@@ -69,7 +69,12 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         mt.setTag(tag)
         mt.setUserData({
-            type: "tank"
+            type: "tank",
+            texture: {
+                type: "url",
+                data: res.warrior
+            },
+            size: 1
         })
 
         let mtSize = mt.getBoundingBox();
@@ -87,12 +92,18 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         st.setTag(tag)
         st.setUserData({
-            type: "tank"
+            type: "tank",
+            texture: {
+                type: "url",
+                data: res.paladin
+            },
+            size: 1
         })
         st.setScale(scale)
         this.addChild(st, 0)
         game.playerList[tag] = st
 
+        tag = Math.floor(Math.random() * 100000)
         let h1 = new cc.Sprite(res.whitemage);
         h1.attr({
             x: size.width / 2 + game.iconSize / 2 + 5,
@@ -100,12 +111,18 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         h1.setTag(tag)
         h1.setUserData({
-            type: "healer"
+            type: "healer",
+            texture: {
+                type: "url",
+                data: res.whitemage
+            },
+            size: 1
         })
         h1.setScale(scale)
         this.addChild(h1, 0)
         game.playerList[tag] = h1
 
+        tag = Math.floor(Math.random() * 100000)
         let h2 = new cc.Sprite(res.scholar);
         h2.attr({
             x: size.width / 2 + game.iconSize * 1.5 + 10,
@@ -113,12 +130,18 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         h2.setTag(tag)
         h2.setUserData({
-            type: "healer"
+            type: "healer",
+            texture: {
+                type: "url",
+                data: res.scholar
+            },
+            size: 1
         })
         h2.setScale(scale)
         this.addChild(h2, 0)
         game.playerList[tag] = h2
 
+        tag = Math.floor(Math.random() * 100000)
         let d1 = new cc.Sprite(res.dragoon);
         d1.attr({
             x: size.width / 2 - game.iconSize * 1.5 - 10,
@@ -126,12 +149,18 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         d1.setTag(tag)
         d1.setUserData({
-            type: "dps"
+            type: "dps",
+            texture: {
+                type: "url",
+                data: res.dragoon
+            },
+            size: 1
         })
         d1.setScale(scale)
         this.addChild(d1, 0)
         game.playerList[tag] = d1
 
+        tag = Math.floor(Math.random() * 100000)
         let d2 = new cc.Sprite(res.samurai);
         d2.attr({
             x: size.width / 2 - 5 - game.iconSize / 2,
@@ -139,12 +168,18 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         d2.setTag(tag)
         d2.setUserData({
-            type: "dps"
+            type: "dps",
+            texture: {
+                type: "url",
+                data: res.samurai
+            },
+            size: 1
         })
         d2.setScale(scale)
         this.addChild(d2, 0)
         game.playerList[tag] = d2
 
+        tag = Math.floor(Math.random() * 100000)
         let d3 = new cc.Sprite(res.bard);
         d3.attr({
             x: size.width / 2 + game.iconSize / 2 + 5,
@@ -152,20 +187,32 @@ const HelloWorldLayer = cc.Layer.extend({
         })
         d3.setTag(tag)
         d3.setUserData({
-            type: "dps"
+            type: "dps",
+            texture: {
+                type: "url",
+                data: res.bard
+            },
+            size: 1
         })
         d3.setScale(scale)
         this.addChild(d3, 0)
         game.playerList[tag] = d3
 
-        let d4 = new cc.Sprite(res.summoner);
+        tag = Math.floor(Math.random() * 100000)
+        let d4 = new cc.Sprite();
+        d4.setTexture(res.summoner)
         d4.attr({
             x: size.width / 2 + game.iconSize * 1.5 + 10,
             y: size.height / 3 - game.iconSize - 5
         })
         d4.setTag(tag)
         d4.setUserData({
-            type: "dps"
+            type: "dps",
+            texture: {
+                type: "url",
+                data: res.summoner
+            },
+            size: 1
         })
         d4.setScale(scale)
         this.addChild(d4, 0)
@@ -175,6 +222,9 @@ const HelloWorldLayer = cc.Layer.extend({
         window.listener.touchEmptyListener = cc.EventListener.create({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
             onTouchBegan: function (touch, event) {
+                if (host === 0) {
+                    return false
+                }
                 if (panel.target.type === "new_target") {
                     const data = panel.target;
                     const touchLocation = touch.getLocation();
@@ -189,7 +239,7 @@ const HelloWorldLayer = cc.Layer.extend({
                     }
 
                     const tag = Math.floor(Math.random() * 100000)
-                    let target = new cc.Sprite();
+                    let target = new cc.Sprite(res.summoner);
                     target.attr({
                         x: touchLocation.x,
                         y: touchLocation.y
@@ -202,24 +252,44 @@ const HelloWorldLayer = cc.Layer.extend({
                             const texture = new cc.Texture2D();
                             texture.initWithElement(img);
                             texture.handleLoadedTexture();
-                            target.setTexture(texture);
+                            target.setTexture(texture)
+                            const size = data.size;
+                            if (size) {
+                                target.setScale(game.iconSize * size / 2 / target.getBoundingBox().width)
+                            } else {
+                                target.setScale(game.iconSize / target.getBoundingBox().width)
+                            }
+                            target.setUserData({
+                                texture: {
+                                    type: "img",
+                                    data: img
+                                },
+                                size: size ? size : 1
+                            })
                         });
                     } else {
-                        const texture = cc.textureCache.addImage(res.mechanism);
-                        target.setTexture(texture);
-                    }
+                        target.setTexture(res.mechanism);
+                        const size = data.size;
+                        if (size) {
+                            target.setScale(game.iconSize * size / 2 / target.getBoundingBox().width)
+                        } else {
+                            target.setScale(game.iconSize / target.getBoundingBox().width)
+                        }
 
-                    const size = data.size;
-                    if (size) {
-                        target.setScale(game.iconSize * size / 2 / target.getBoundingBox().width)
-                    } else {
-                        target.setScale(game.iconSize / target.getBoundingBox().width)
+                        target.setUserData({
+                            texture: {
+                                type: "url",
+                                data: res.mechanism
+                            },
+                            size: size ? size : 1
+                        })
                     }
 
                     game.layer.addChild(target, 0)
                     cc.eventManager.addListener(listener.moveItemListener.clone(), target)
                     game.playerList[tag] = target
                     game.calculateMechanism()
+                    updateNeedUpdate()
                 }
             }
         })
@@ -228,6 +298,9 @@ const HelloWorldLayer = cc.Layer.extend({
             event: cc.EventListener.TOUCH_ONE_BY_ONE,
             swallowTouches: true,
             onTouchBegan: function (touch, event) {
+                if (host === 0) {
+                    return false
+                }
                 const target = event.getCurrentTarget();
                 const locationInNode = target.convertToNodeSpace(touch.getLocation());
                 const s = target.getContentSize()
@@ -247,6 +320,7 @@ const HelloWorldLayer = cc.Layer.extend({
                 listener.movingDistance += delta.x * delta.x + delta.y * delta.y;
 
                 game.calculateMechanism()
+                updateNeedUpdate()
             },
             onTouchEnded: function (touch, event) {
                 if (listener.movingDistance < 2) {
@@ -262,6 +336,7 @@ const HelloWorldLayer = cc.Layer.extend({
                         mechanism.setUserData(panel.target.userData)
                         target.addChild(mechanism, -1)
                         game.mechanismList[tag] = mechanism;
+                        updateNeedUpdate()
                     }
                 }
             }
@@ -314,7 +389,7 @@ window.game.calculateMechanism = function () {
 const HelloWorldScene = cc.Scene.extend({
     onEnter: function () {
         this._super();
-        const layer = new HelloWorldLayer();
+        const layer = new localLayer();
         this.addChild(layer);
     }
 });

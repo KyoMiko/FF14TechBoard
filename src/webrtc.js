@@ -4,9 +4,11 @@ export default class WebrtcClient {
     uid;
     connectionList = {};
     iceServers;
+    wsServer;
 
     constructor(iceServers, wsServer) {
         this.iceServers = iceServers
+        this.wsServer = wsServer
         this.ws = new WebSocket(wsServer)
         this.ws.onopen = this.onWSOpen
         this.ws.onmessage = this.onWSMessage
@@ -38,6 +40,10 @@ export default class WebrtcClient {
                 duration: 1000
             })
             return
+        }
+
+        if (this.ws.readyState === 3) {
+            this.ws = new WebSocket(this.wsServer)
         }
         updateHost(0)
         const peer = new RTCPeerConnection(
@@ -167,7 +173,6 @@ export default class WebrtcClient {
     }
 
     onWSOpen = () => {
-        debugger
         this.ws.send(JSON.stringify({
             type: 'connect'
         }))
@@ -217,6 +222,7 @@ export default class WebrtcClient {
                                 type: 'success',
                                 duration: 1000
                             })
+                            updateNeedUpdate()
                         }
                         channel.onclose = () => {
                             if (host !== -1) {
