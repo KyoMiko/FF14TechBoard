@@ -208,9 +208,10 @@ export default class WebrtcClient {
     }
 
     sendMessage(message) {
+        const msg = LZString.compressToEncodedURIComponent(message)
         for (const key in this.connectionList) {
             const connection = this.connectionList[key]
-            connection.channel.send(message)
+            connection.channel.send(msg)
         }
     }
 

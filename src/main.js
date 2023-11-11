@@ -15,7 +15,9 @@ const vm = createApp({
             needUpdate: false,
             updating: false,
             syncing: false,
-            init: false
+            init: false,
+            texture: {},
+            mapSelected: {}
         }
     },
     computed: {
@@ -93,13 +95,15 @@ const vm = createApp({
             this.updating = true
             let data = getCurrentData();
             this.updating = false
+            debugger
             this.webrtc.sendMessage(JSON.stringify({
                 type: "sync",
                 data: data
             }))
         },
         handleReceive(event) {
-            const msg = JSON.parse(event.data);
+            debugger
+            const msg = JSON.parse(LZString.decompressFromEncodedURIComponent(event.data));
             const type = msg.type
             if (type === "sync" && this.syncing === false) {
                 this.syncing = true
@@ -129,12 +133,38 @@ const vm = createApp({
                         texture.initWithElement(img);
                         texture.handleLoadedTexture();
                         background.setTexture(texture);
+                        background.setUserData({
+                            texture: {
+                                type: "base64",
+                                data: Base64String.compress(fileReader.result)
+                            }
+                        })
                         background.setScale(1);
                         let backgroundSize = background.getBoundingBox();
                         let backgroundScale = (window.game.iconSize * 30) / backgroundSize.width;
                         background.setScale(backgroundScale)
+                        updateNeedUpdate()
                     });
                 }
+            }
+        },
+        changeMap() {
+            if (host === 0) {
+                this.$message({message: "您不是主持人，无法更换地图", type: "error"})
+            } else {
+                const background = game.layer.getChildren()[0];
+                background.setTexture(this.mapSelected);
+                background.setUserData({
+                    texture: {
+                        type: "url",
+                        data: this.mapSelected
+                    }
+                })
+                background.setScale(1);
+                let backgroundSize = background.getBoundingBox();
+                let backgroundScale = (window.game.iconSize * 30) / backgroundSize.width;
+                background.setScale(backgroundScale)
+                this.needUpdate = true
             }
         }
     },
@@ -160,6 +190,9 @@ const vm = createApp({
         }
         window.updateSyncing = () => {
             this.syncing = false;
+        }
+        window.loadTexture = (texture) => {
+            this.texture = JSON.parse(JSON.stringify(texture))
         }
     }
 })

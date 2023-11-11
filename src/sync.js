@@ -1,11 +1,6 @@
 export function getCurrentData() {
     let data = {}
-    data.background = {
-        texture: {
-            type: "url",
-            data: res.background
-        }
-    }
+    data.background = game.layer.getChildren()[0].getUserData()
     data.playerList = []
     for (const tag in game.playerList) {
         const player = game.playerList[tag];
@@ -46,11 +41,17 @@ export function syncScene(data) {
         layer.addChild(background, -1)
         cc.eventManager.addListener(listener.touchEmptyListener.clone(), background)
         if (backgroundInfo.texture.type === "base64") {
-            cc.loader.loadImg(backgroundInfo.texture.data, {isCrossOrigin: false}, function (err, img) {
+            cc.loader.loadImg(Base64String.decompress(backgroundInfo.texture.data), {isCrossOrigin: false}, function (err, img) {
                 const texture = new cc.Texture2D();
                 texture.initWithElement(img);
                 texture.handleLoadedTexture();
                 background.setTexture(texture);
+                background.setUserData({
+                    texture: {
+                        type: "base64",
+                        data: backgroundInfo.texture.data
+                    }
+                })
                 let backgroundSize = background.getBoundingBox();
                 let backgroundScale = Math.min(size.width / backgroundSize.width, size.height / backgroundSize.height);
                 background.setScale(backgroundScale * 0.9)
@@ -61,9 +62,15 @@ export function syncScene(data) {
         } else {
             let url = backgroundInfo.texture.data;
             if (!url) {
-                url = res.background;
+                url = res.background.p12s;
             }
             background.setTexture(url);
+            background.setUserData({
+                texture: {
+                    type: "url",
+                    data: url
+                }
+            })
             let backgroundSize = background.getBoundingBox();
             let backgroundScale = Math.min(size.width / backgroundSize.width, size.height / backgroundSize.height);
             background.setScale(backgroundScale * 0.9)
@@ -129,7 +136,7 @@ function loadTexture(sprite) {
             sprite.setScale(game.iconSize / sprite.getBoundingBox().width)
         }
     } else if (texture.type === 'base64') {
-        cc.loader.loadImg(texture.data, {isCrossOrigin: false}, function (err, img) {
+        cc.loader.loadImg(Base64String.decompress(texture.data), {isCrossOrigin: false}, function (err, img) {
             const texture = new cc.Texture2D();
             texture.initWithElement(img);
             texture.handleLoadedTexture();

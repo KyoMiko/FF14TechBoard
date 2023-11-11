@@ -40,10 +40,16 @@ const localLayer = cc.Layer.extend({
         // ask the window size
         const size = cc.winSize;
 
-        let background = new cc.Sprite(res.background);
+        let background = new cc.Sprite(res.background.p12s);
         background.attr({
             x: size.width / 2,
             y: size.height / 2
+        })
+        background.setUserData({
+            texture: {
+                type: "url",
+                data: res.background.p12s
+            }
         })
         let backgroundSize = background.getBoundingBox();
         let backgroundScale = Math.min(size.width / backgroundSize.width, size.height / backgroundSize.height);
@@ -62,7 +68,7 @@ const localLayer = cc.Layer.extend({
 
         //初始化玩家
         let tag = Math.floor(Math.random() * 100000);
-        let mt = new cc.Sprite(res.warrior);
+        let mt = new cc.Sprite(res.players.warrior);
         mt.attr({
             x: size.width / 2 - game.iconSize * 1.5 - 10,
             y: size.height / 3
@@ -72,7 +78,7 @@ const localLayer = cc.Layer.extend({
             type: "tank",
             texture: {
                 type: "url",
-                data: res.warrior
+                data: res.players.warrior
             },
             size: 2
         })
@@ -85,7 +91,7 @@ const localLayer = cc.Layer.extend({
         game.playerList[tag] = mt
 
         tag = Math.floor(Math.random() * 100000)
-        let st = new cc.Sprite(res.paladin);
+        let st = new cc.Sprite(res.players.paladin);
         st.attr({
             x: size.width / 2 - 5 - game.iconSize / 2,
             y: size.height / 3
@@ -95,7 +101,7 @@ const localLayer = cc.Layer.extend({
             type: "tank",
             texture: {
                 type: "url",
-                data: res.paladin
+                data: res.players.paladin
             },
             size: 2
         })
@@ -104,7 +110,7 @@ const localLayer = cc.Layer.extend({
         game.playerList[tag] = st
 
         tag = Math.floor(Math.random() * 100000)
-        let h1 = new cc.Sprite(res.whitemage);
+        let h1 = new cc.Sprite(res.players.whitemage);
         h1.attr({
             x: size.width / 2 + game.iconSize / 2 + 5,
             y: size.height / 3
@@ -114,7 +120,7 @@ const localLayer = cc.Layer.extend({
             type: "healer",
             texture: {
                 type: "url",
-                data: res.whitemage
+                data: res.players.whitemage
             },
             size: 2
         })
@@ -123,7 +129,7 @@ const localLayer = cc.Layer.extend({
         game.playerList[tag] = h1
 
         tag = Math.floor(Math.random() * 100000)
-        let h2 = new cc.Sprite(res.scholar);
+        let h2 = new cc.Sprite(res.players.scholar);
         h2.attr({
             x: size.width / 2 + game.iconSize * 1.5 + 10,
             y: size.height / 3
@@ -133,7 +139,7 @@ const localLayer = cc.Layer.extend({
             type: "healer",
             texture: {
                 type: "url",
-                data: res.scholar
+                data: res.players.scholar
             },
             size: 2
         })
@@ -142,7 +148,7 @@ const localLayer = cc.Layer.extend({
         game.playerList[tag] = h2
 
         tag = Math.floor(Math.random() * 100000)
-        let d1 = new cc.Sprite(res.dragoon);
+        let d1 = new cc.Sprite(res.players.dragoon);
         d1.attr({
             x: size.width / 2 - game.iconSize * 1.5 - 10,
             y: size.height / 3 - game.iconSize - 5
@@ -152,7 +158,7 @@ const localLayer = cc.Layer.extend({
             type: "dps",
             texture: {
                 type: "url",
-                data: res.dragoon
+                data: res.players.dragoon
             },
             size: 2
         })
@@ -161,7 +167,7 @@ const localLayer = cc.Layer.extend({
         game.playerList[tag] = d1
 
         tag = Math.floor(Math.random() * 100000)
-        let d2 = new cc.Sprite(res.samurai);
+        let d2 = new cc.Sprite(res.players.samurai);
         d2.attr({
             x: size.width / 2 - 5 - game.iconSize / 2,
             y: size.height / 3 - game.iconSize - 5
@@ -171,7 +177,7 @@ const localLayer = cc.Layer.extend({
             type: "dps",
             texture: {
                 type: "url",
-                data: res.samurai
+                data: res.players.samurai
             },
             size: 2
         })
@@ -180,7 +186,7 @@ const localLayer = cc.Layer.extend({
         game.playerList[tag] = d2
 
         tag = Math.floor(Math.random() * 100000)
-        let d3 = new cc.Sprite(res.bard);
+        let d3 = new cc.Sprite(res.players.bard);
         d3.attr({
             x: size.width / 2 + game.iconSize / 2 + 5,
             y: size.height / 3 - game.iconSize - 5
@@ -190,7 +196,7 @@ const localLayer = cc.Layer.extend({
             type: "dps",
             texture: {
                 type: "url",
-                data: res.bard
+                data: res.players.bard
             },
             size: 2
         })
@@ -200,7 +206,7 @@ const localLayer = cc.Layer.extend({
 
         tag = Math.floor(Math.random() * 100000)
         let d4 = new cc.Sprite();
-        d4.setTexture(res.summoner)
+        d4.setTexture(res.players.summoner)
         d4.attr({
             x: size.width / 2 + game.iconSize * 1.5 + 10,
             y: size.height / 3 - game.iconSize - 5
@@ -210,7 +216,7 @@ const localLayer = cc.Layer.extend({
             type: "dps",
             texture: {
                 type: "url",
-                data: res.summoner
+                data: res.players.summoner
             },
             size: 2
         })
@@ -230,7 +236,7 @@ const localLayer = cc.Layer.extend({
                     const touchLocation = touch.getLocation();
 
                     const tag = Math.floor(Math.random() * 100000)
-                    let target = new cc.Sprite(res.summoner);
+                    let target = new cc.Sprite();
                     target.attr({
                         x: touchLocation.x,
                         y: touchLocation.y
@@ -256,7 +262,7 @@ const localLayer = cc.Layer.extend({
                             target.setUserData({
                                 texture: {
                                     type: "base64",
-                                    data: icon
+                                    data: Base64String.compress(icon)
                                 },
                                 size: size ? size : 2
                             })

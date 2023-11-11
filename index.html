@@ -94,6 +94,8 @@
     <link href="//unpkg.com/element-plus/dist/index.css" rel="stylesheet"/>
     <link href="lib/css-vars.css" rel="stylesheet">
     <script src="//unpkg.com/element-plus"></script>
+    <script src="lib/lz-string.min.js"></script>
+    <script src="lib/base64-string.js"></script>
 
 </head>
 
@@ -115,9 +117,18 @@
         <el-button @click="releaseConnection" v-if="webrtc !== null">离线</el-button>
         <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
         <el-button :disabled="webrtc === null || host === -1" @click="leaveConnection">断开</el-button>
-        <el-upload :auto-upload="false" :on-change="uploadMap" :show-file-list="false" action="#">
-            <el-button type="primary">上传地图</el-button>
-        </el-upload>
+        <div>
+            <el-select v-model="mapSelected">
+                <el-option :key="map.key" :label="map.label" :value="map.path"
+                           v-for="map in texture.background"></el-option>
+            </el-select>
+            <div style="display: flex;justify-content: center">
+                <el-button @click="changeMap" type="primary">更换地图</el-button>
+                <el-upload :auto-upload="false" :on-change="uploadMap" :show-file-list="false" action="#">
+                    <el-button type="primary">上传地图</el-button>
+                </el-upload>
+            </div>
+        </div>
     </div>
 </div>
 <script src="src/main.js" type="module"></script>
