@@ -262,7 +262,7 @@ const localLayer = cc.Layer.extend({
                             target.setUserData({
                                 texture: {
                                     type: "base64",
-                                    data: Base64String.compress(icon)
+                                    data: icon
                                 },
                                 size: size ? size : 2
                             })

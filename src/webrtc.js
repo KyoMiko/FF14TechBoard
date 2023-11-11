@@ -10,6 +10,8 @@ export default class WebrtcClient {
     lockReconnect = false;
     wsServer;
     keepConnect = true;
+    receiveBuffer = [];
+    packetNum = 0;
 
     constructor(iceServers, wsServer) {
         this.iceServers = iceServers
@@ -104,7 +106,7 @@ export default class WebrtcClient {
             }
         }
         const channel = peer.createDataChannel("channel");
-        channel.onmessage = this.onReceive
+        channel.onmessage = this.handelReceive
         channel.onopen = () => {
             ElNotification({
                 title: '成功加入',
@@ -208,10 +210,56 @@ export default class WebrtcClient {
     }
 
     sendMessage(message) {
-        const msg = LZString.compressToEncodedURIComponent(message)
-        for (const key in this.connectionList) {
-            const connection = this.connectionList[key]
-            connection.channel.send(msg)
+        const length = message.length;
+        if (length > 16384) {
+            const num = Math.ceil(length / 16300);
+            for (const key in this.connectionList) {
+                const channel = this.connectionList[key].channel
+                channel.send(JSON.stringify({
+                    type: 'total',
+                    num: num
+                }))
+                for (let i = 0; i < num; i++) {
+                    channel.send(JSON.stringify({
+                        type: 'buffer',
+                        num: i,
+                        data: message.substring(i * 16300, (i + 1) * 16300)
+                    }))
+                }
+            }
+            this.ws.send()
+            for (let i = 0; i < num; i++) {
+                this.ws.send(JSON.stringify({
+                    type: 'buffer',
+                    num: i,
+                    data: message.substring(i * 16384, (i + 1) * 16384)
+                }))
+            }
+        } else {
+            for (const key in this.connectionList) {
+                const channel = this.connectionList[key].channel
+                channel.send(message)
+            }
+        }
+    }
+
+    handelReceive = (event) => {
+        const msg = event.data;
+        try {
+            const data = JSON.parse(msg);
+            if (data.type === 'total') {
+                this.receiveBuffer = [];
+                this.packetNum = data.num;
+            } else if (data.type === 'buffer') {
+                this.receiveBuffer[data.num] = data.data;
+                if (this.receiveBuffer.length === this.packetNum) {
+                    this.onReceive(JSON.parse(this.receiveBuffer.join('')));
+                }
+            } else {
+                this.onReceive(data);
+            }
+        } catch (e) {
+
         }
     }
 

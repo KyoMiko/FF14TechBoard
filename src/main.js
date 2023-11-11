@@ -10,6 +10,7 @@ const vm = createApp({
             roomNum: "",
             ws: null,
             webrtc: null,
+            imgCompressorConfig: {},
             host: -1,
             people: 0,
             needUpdate: false,
@@ -101,9 +102,7 @@ const vm = createApp({
                 data: data
             }))
         },
-        handleReceive(event) {
-            debugger
-            const msg = JSON.parse(LZString.decompressFromEncodedURIComponent(event.data));
+        handleReceive(msg) {
             const type = msg.type
             if (type === "sync" && this.syncing === false) {
                 this.syncing = true
@@ -123,29 +122,36 @@ const vm = createApp({
             if (host === 0) {
                 this.$message({message: "您不是主持人，无法上传地图", type: "error"})
             } else {
-                const fileReader = new FileReader();
-                fileReader.readAsDataURL(file.raw);
-                fileReader.onload = () => {
-                    this.$message({message: "上传地图成功", type: "success"})
-                    const background = game.layer.getChildren()[0];
-                    cc.loader.loadImg(fileReader.result, {isCrossOrigin: false}, function (err, img) {
-                        const texture = new cc.Texture2D();
-                        texture.initWithElement(img);
-                        texture.handleLoadedTexture();
-                        background.setTexture(texture);
-                        background.setUserData({
-                            texture: {
-                                type: "base64",
-                                data: Base64String.compress(fileReader.result)
-                            }
-                        })
-                        background.setScale(1);
-                        let backgroundSize = background.getBoundingBox();
-                        let backgroundScale = (window.game.iconSize * 30) / backgroundSize.width;
-                        background.setScale(backgroundScale)
-                        updateNeedUpdate()
-                    });
+                const config = {
+                    ...this.imgCompressorConfig,
+                    file: file.raw,
+                    success: (result) => {
+                        const fileReader = new FileReader();
+                        fileReader.readAsDataURL(result);
+                        fileReader.onload = () => {
+                            this.$message({message: "上传地图成功", type: "success"})
+                            const background = game.layer.getChildren()[0];
+                            cc.loader.loadImg(fileReader.result, {isCrossOrigin: false}, function (err, img) {
+                                const texture = new cc.Texture2D();
+                                texture.initWithElement(img);
+                                texture.handleLoadedTexture();
+                                background.setTexture(texture);
+                                background.setUserData({
+                                    texture: {
+                                        type: "base64",
+                                        data: fileReader.result
+                                    }
+                                })
+                                background.setScale(1);
+                                let backgroundSize = background.getBoundingBox();
+                                let backgroundScale = (window.game.iconSize * 30) / backgroundSize.width;
+                                background.setScale(backgroundScale)
+                                updateNeedUpdate()
+                            });
+                        }
+                    }
                 }
+                new ImageCompressor(config)
             }
         },
         changeMap() {
@@ -169,7 +175,12 @@ const vm = createApp({
         }
     },
     mounted() {
-        window.test = this
+        this.imgCompressorConfig = {
+            quality: 0.6,
+            maxWidth: 800,
+            maxHeight: 800,
+            convertSize: 5000000
+        };
         window.ElNotification = this.$notify
         window.host = -1
         window.updateHost = (val) => {

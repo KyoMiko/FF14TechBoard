@@ -41,7 +41,7 @@ export function syncScene(data) {
         layer.addChild(background, -1)
         cc.eventManager.addListener(listener.touchEmptyListener.clone(), background)
         if (backgroundInfo.texture.type === "base64") {
-            cc.loader.loadImg(Base64String.decompress(backgroundInfo.texture.data), {isCrossOrigin: false}, function (err, img) {
+            cc.loader.loadImg(backgroundInfo.texture.data, {isCrossOrigin: false}, function (err, img) {
                 const texture = new cc.Texture2D();
                 texture.initWithElement(img);
                 texture.handleLoadedTexture();
@@ -136,7 +136,7 @@ function loadTexture(sprite) {
             sprite.setScale(game.iconSize / sprite.getBoundingBox().width)
         }
     } else if (texture.type === 'base64') {
-        cc.loader.loadImg(Base64String.decompress(texture.data), {isCrossOrigin: false}, function (err, img) {
+        cc.loader.loadImg(texture.data, {isCrossOrigin: false}, function (err, img) {
             const texture = new cc.Texture2D();
             texture.initWithElement(img);
             texture.handleLoadedTexture();
