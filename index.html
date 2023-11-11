@@ -115,8 +115,8 @@
         <el-button @click="releaseConnection" v-if="webrtc !== null">离线</el-button>
         <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
         <el-button :disabled="webrtc === null || host === -1" @click="leaveConnection">断开</el-button>
-        <el-upload :auto-upload="false" :on-change="uploadFile" :show-file-list="false" action="#">
-            <el-button type="primary">上传素材</el-button>
+        <el-upload :auto-upload="false" :on-change="uploadMap" :show-file-list="false" action="#">
+            <el-button type="primary">上传地图</el-button>
         </el-upload>
     </div>
 </div>

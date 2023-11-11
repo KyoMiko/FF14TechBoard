@@ -17,7 +17,6 @@ export function getCurrentData() {
     }
     data.targetList = []
     for (const tag in game.targetList) {
-        debugger
         const target = game.targetList[tag];
         data.targetList.push({
             tag: tag,

@@ -9,7 +9,6 @@ const vm = createApp({
             selfNum: "",
             roomNum: "",
             ws: null,
-            data: "",
             webrtc: null,
             host: -1,
             people: 0,
@@ -114,6 +113,28 @@ const vm = createApp({
                 panel.target.icon = fileReader.result
                 panel.target.type = "new_target"
                 this.$message({message: "上传素材成功", type: "success"})
+            }
+        },
+        uploadMap(file) {
+            if (host === 0) {
+                this.$message({message: "您不是主持人，无法上传地图", type: "error"})
+            } else {
+                const fileReader = new FileReader();
+                fileReader.readAsDataURL(file.raw);
+                fileReader.onload = () => {
+                    this.$message({message: "上传地图成功", type: "success"})
+                    const background = game.layer.getChildren()[0];
+                    cc.loader.loadImg(fileReader.result, {isCrossOrigin: false}, function (err, img) {
+                        const texture = new cc.Texture2D();
+                        texture.initWithElement(img);
+                        texture.handleLoadedTexture();
+                        background.setTexture(texture);
+                        background.setScale(1);
+                        let backgroundSize = background.getBoundingBox();
+                        let backgroundScale = (window.game.iconSize * 30) / backgroundSize.width;
+                        background.setScale(backgroundScale)
+                    });
+                }
             }
         }
     },
