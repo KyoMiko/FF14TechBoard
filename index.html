@@ -4,10 +4,10 @@
 <head>
     <meta charset="utf-8">
     <title>狒狒战术板</title>
-    <link href="res/favicon.ico" rel="icon" type="image/GIF"/>
+    <link href="res/favicon.ico" rel="icon" type="image/GIF" />
 
     <meta content="width=device-width,user-scalable=no,initial-scale=1, minimum-scale=1,maximum-scale=1"
-          name="viewport"/>
+        name="viewport" />
 
     <!--https://developer.apple.com/library/safari/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/MetaTags.html-->
     <meta content="yes" name="apple-mobile-web-app-capable">
@@ -15,16 +15,16 @@
     <meta content="telephone=no" name="format-detection">
 
     <!-- force webkit on 360 -->
-    <meta content="webkit" name="renderer"/>
-    <meta content="webkit" name="force-rendering"/>
+    <meta content="webkit" name="renderer" />
+    <meta content="webkit" name="force-rendering" />
     <!-- force edge on IE -->
-    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
     <meta content="no" name="msapplication-tap-highlight">
 
     <!-- force full screen on some browser -->
-    <meta content="yes" name="full-screen"/>
-    <meta content="true" name="x5-fullscreen"/>
-    <meta content="true" name="360-fullscreen"/>
+    <meta content="yes" name="full-screen" />
+    <meta content="true" name="x5-fullscreen" />
+    <meta content="true" name="360-fullscreen" />
 
     <!-- force screen orientation on some browser -->
     <!-- <meta name="screen-orientation" content="portrait"/>
@@ -91,7 +91,7 @@
     </style>
 
     <script src="//unpkg.com/vue@3"></script>
-    <link href="//unpkg.com/element-plus/dist/index.css" rel="stylesheet"/>
+    <link href="//unpkg.com/element-plus/dist/index.css" rel="stylesheet" />
     <link href="lib/css-vars.css" rel="stylesheet">
     <script src="//unpkg.com/element-plus"></script>
     <script src="lib/image-compressor.min.js"></script>
@@ -99,38 +99,112 @@
 </head>
 
 <body>
-<div style="display: flex;">
-    <div style="height: 100vh;width: 70vw;">
-        <script src="res/loading.js"></script>
-        <canvas height="720" id="gameCanvas" width="480"></canvas>
-        <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
-        <script cocos src="main.js"></script>
-    </div>
-    <div id="app" style="height: 100vh;width: 30vw;">
-        <el-tooltip :content="hostTip" :visible="host === 1?null:false">
-            <el-tag :type="mode.type">{{mode.text}}</el-tag>
-        </el-tooltip>
-        <el-input disabled v-model="selfNum"></el-input>
-        <el-input v-model="roomNum"></el-input>
-        <el-button @click="createConnection" v-if="webrtc === null">连接</el-button>
-        <el-button @click="releaseConnection" v-if="webrtc !== null">离线</el-button>
-        <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
-        <el-button :disabled="webrtc === null || host === -1" @click="leaveConnection">断开</el-button>
-        <div>
-            <el-select v-model="mapSelected">
-                <el-option :key="map.key" :label="map.label" :value="map.path"
-                           v-for="map in texture.background"></el-option>
-            </el-select>
-            <div style="display: flex;justify-content: center">
-                <el-button @click="changeMap" type="primary">更换地图</el-button>
-                <el-upload :auto-upload="false" :on-change="uploadMap" :show-file-list="false" action="#">
-                    <el-button type="primary">上传地图</el-button>
-                </el-upload>
-            </div>
+    <div style="display: flex;">
+        <div style="height: 100vh;width: 70vw;">
+            <script src="res/loading.js"></script>
+            <canvas height="720" id="gameCanvas" width="480"></canvas>
+            <script src="frameworks/cocos2d-html5/CCBoot.js"></script>
+            <script cocos src="main.js"></script>
+        </div>
+        <div id="app" style="height: 100vh;width: 30vw;">
+            <el-tooltip :content="hostTip" :visible="host === 1?null:false">
+                <el-tag :type="mode.type"
+                    style="position: absolute; z-index: 1;top: 8px;right: 10px;">{{mode.text}}</el-tag>
+            </el-tooltip>
+            <el-tabs type="border-card" style="height: 99.8%;">
+                <el-tab-pane label="战术板" name="techboard">
+                    <div>
+                        <el-collapse>
+                            <el-collapse-item title="选择场地">
+                                <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
+                                    <el-col :span="8">
+                                        <el-select v-model="mapSelected">
+                                            <el-option :key="map.key" :label="map.label" :value="map.path"
+                                                v-for="map in texture.background"></el-option>
+                                        </el-select>
+                                    </el-col>
+                                    <el-col :span="8">
+                                        <el-input placeholder="场地缩放"></el-input>
+                                    </el-col>
+                                </el-row>
+
+                                <el-row justify="center">
+                                    <el-col :span="4">
+                                        <el-button @click="changeMap" type="primary">更换场地</el-button>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-upload :auto-upload="false" :on-change="uploadMap" :show-file-list="false"
+                                            action="#">
+                                            <el-button type="primary">上传场地</el-button>
+                                        </el-upload>
+                                    </el-col>
+                                </el-row>
+                            </el-collapse-item>
+                            <el-collapse-item title="场地标记">
+                                <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
+                                    <el-col :span="8">
+                                        <el-select v-model="waymark.texture">
+                                            <el-option :key="map.key" :label="map.label" :value="map.path"
+                                                v-for="map in texture.waymark"></el-option>
+                                        </el-select>
+                                    </el-col>
+                                </el-row>
+                                <el-row justify="center">
+                                    <el-col :span="4">
+                                        <el-tooltip content="点击按钮后，点击左侧添加场地标记">
+                                            <el-button @click="addWaymarkHandler" type="primary" :plane="action==='addWaymark'&&addWaymarkPlane" :disabled="action==='addWaymark'&&addWaymarkPlane">添加单位</el-button>
+                                        </el-tooltip>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-tooltip content="点击按钮后，点击左侧场地标记删除">
+                                            <el-button @click="deleteWaymarkHandler" type="primary" :plane="action==='deleteWaymark'" :disabled="action==='deleteWaymark'">删除单位</el-button>
+                                        </el-tooltip>
+                                    </el-col>
+                                </el-row>
+                            </el-collapse-item>
+                            <el-collapse-item title="游戏单位">
+                                <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
+                                    <el-col :span="8">
+                                        <el-select v-model="target.texture">
+                                            <el-option :key="map.key" :label="map.label" :value="map.path"
+                                                v-for="map in texture.target"></el-option>
+                                        </el-select>
+                                    </el-col>
+                                    <el-col :span="8">
+                                        <el-input placeholder="单位直径（场地直径60m）" v-model="target.size" type="number"></el-input>
+                                    </el-col>
+                                </el-row>
+                                <el-row justify="center">
+                                    <el-col :span="4">
+                                        <el-tooltip content="点击按钮后，点击左侧添加单位">
+                                            <el-button @click="addTargetHandler" type="primary" :plane="action==='addTarget'&&addTargetPlane" :disabled="action==='addTarget'&&addTargetPlane">添加单位</el-button>
+                                        </el-tooltip>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-tooltip content="点击按钮后，点击左侧单位删除">
+                                            <el-button @click="deleteTargetHandler" type="primary" :plane="action==='deleteTarget'" :disabled="action==='deleteTarget'">删除单位</el-button>
+                                        </el-tooltip>
+                                    </el-col>
+                                </el-row>
+                            </el-collapse-item>
+                            <el-collapse-item title="游戏机制">
+                                待开发
+                            </el-collapse-item>
+                        </el-collapse>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="联机" name="online">
+                    <el-input disabled v-model="selfNum" placeholder="房间号"></el-input>
+                    <el-input v-model="roomNum" placeholder="请输入对方的房间号"></el-input>
+                    <el-button @click="createConnection" v-if="webrtc === null">上线</el-button>
+                    <el-button @click="releaseConnection" v-if="webrtc !== null">离线</el-button>
+                    <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
+                    <el-button :disabled="webrtc === null || host === -1" @click="leaveConnection">断开</el-button>
+                </el-tab-pane>
+            </el-tabs>
         </div>
     </div>
-</div>
-<script src="src/main.js" type="module"></script>
+    <script src="src/main.js" type="module"></script>
 </body>
 
 </html>

@@ -25,7 +25,7 @@
 window.game = {}
 window.listener = {}
 window.panel = {}
-window.panel.target = {}
+window.panel.action = {}
 
 const localLayer = cc.Layer.extend({
     sprite: null,
@@ -57,7 +57,7 @@ const localLayer = cc.Layer.extend({
         this.addChild(background, -1)
         backgroundSize = background.getBoundingBox();
 
-        window.panel.target = {};
+        window.panel.action = {};
         window.game.layer = this;
         window.game.targetList = {};
         window.game.mechanismList = {};
@@ -231,8 +231,13 @@ const localLayer = cc.Layer.extend({
                 if (host === 0) {
                     return false
                 }
-                if (panel.target.type === "new_target") {
-                    const data = panel.target;
+                const type = panel.action.type;
+                if (type === "add_waymark" || type === "add_target") {
+                    const temp = panel.action.type === "add_waymark" ? "waymark" : "target";
+                    const userData = {
+                        type: temp,
+                    }
+                    const data = panel.action.data;
                     const touchLocation = touch.getLocation();
 
                     const tag = Math.floor(Math.random() * 100000)
@@ -246,9 +251,10 @@ const localLayer = cc.Layer.extend({
                     cc.eventManager.addListener(listener.moveItemListener.clone(), target)
                     game.targetList[tag] = target
 
-                    const icon = data.icon;
-                    if (icon) {
-                        cc.loader.loadImg(icon, {isCrossOrigin: false}, function (err, img) {
+                    const texture = data.texture;
+                    const type = texture.type;
+                    if (type === "base64") {
+                        cc.loader.loadImg(texture.data, { isCrossOrigin: false }, function (err, img) {
                             const texture = new cc.Texture2D();
                             texture.initWithElement(img);
                             texture.handleLoadedTexture();
@@ -260,17 +266,18 @@ const localLayer = cc.Layer.extend({
                                 target.setScale(game.iconSize / target.getBoundingBox().width)
                             }
                             target.setUserData({
+                                ...userData,
                                 texture: {
                                     type: "base64",
-                                    data: icon
+                                    data: texture.data
                                 },
                                 size: size ? size : 2
                             })
                             game.calculateMechanism()
                             updateNeedUpdate()
                         });
-                    } else {
-                        target.setTexture(res.mechanism);
+                    } else if (type === "url") {
+                        target.setTexture(texture.data);
                         const size = data.size;
                         if (size) {
                             target.setScale(game.iconSize * size / 2 / target.getBoundingBox().width)
@@ -278,9 +285,10 @@ const localLayer = cc.Layer.extend({
                             target.setScale(game.iconSize / target.getBoundingBox().width)
                         }
                         target.setUserData({
+                            ...userData,
                             texture: {
                                 type: "url",
-                                data: res.mechanism
+                                data: texture.data
                             },
                             size: size ? size : 2
                         })
@@ -321,7 +329,8 @@ const localLayer = cc.Layer.extend({
             },
             onTouchEnded: function (touch, event) {
                 if (listener.movingDistance < 2) {
-                    if (panel.target.type === "mechanism") {
+                    if (panel.action.type === "mechanism") {
+                        const data = panel.action.data;
                         const target = event.getCurrentTarget();
                         const tag = Math.floor(Math.random() * 100000)
                         let mechanism = new cc.Sprite();
@@ -330,7 +339,7 @@ const localLayer = cc.Layer.extend({
                             y: 0
                         })
                         mechanism.setTag(tag)
-                        mechanism.setUserData(panel.target.userData)
+                        mechanism.setUserData(data.userData)
                         target.addChild(mechanism, -1)
                         game.mechanismList[tag] = mechanism;
                         updateNeedUpdate()

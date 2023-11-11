@@ -158,6 +158,9 @@ let texture = {
             label: "标点4",
             path: "res/waymark/waymark4.png"
         }
+    ],
+    target:[
+
     ]
 }
 
@@ -182,6 +185,11 @@ for (const key in texture.waymark) {
     const item = texture.waymark[key];
     g_resources.push(item.path);
     res.waymark[item.key] = item.path
+}
+for (const key in texture.target) {
+    const item = texture.target[key];
+    g_resources.push(item.path);
+    res.target[item.key] = item.path
 }
 
 loadTexture(texture)

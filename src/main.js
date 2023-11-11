@@ -1,7 +1,7 @@
 import WebrtcClient from './webrtc.js'
 import { getCurrentData, syncScene } from "./sync.js";
 
-const {createApp} = Vue;
+const { createApp } = Vue;
 
 const vm = createApp({
     data() {
@@ -18,7 +18,17 @@ const vm = createApp({
             syncing: false,
             init: false,
             texture: {},
-            mapSelected: {}
+            mapSelected: {},
+            action: "",
+            addTargetPlane: false,
+            addWaymarkPlane: false,
+            target: {
+                size: null,
+                texture: null
+            },
+            waymark: {
+                texture: null
+            }
         }
     },
     computed: {
@@ -26,8 +36,8 @@ const vm = createApp({
             let mode = {}
             if (this.webrtc) {
                 if (this.host === -1) {
-                    mode.text = "未连接";
-                    mode.type = "info"
+                    mode.text = "未加入";
+                    mode.type = "warning"
                 } else if (this.host === 0) {
                     mode.text = "参与者";
                     mode.type = ""
@@ -43,6 +53,20 @@ const vm = createApp({
         },
         hostTip() {
             return this.people + "人已加入"
+        }
+    },
+    watch: {
+        target: {
+            handler() {
+                this.addTargetPlane = false
+            },
+            deep: true
+        },
+        waymark: {
+            handler() {
+                this.addWaymarkPlane = false
+            },
+            deep: true
         }
     },
     watch: {
@@ -78,6 +102,10 @@ const vm = createApp({
             this.webrtc = null
         },
         joinConnection() {
+            if (this.roomNum === "") {
+                this.$message({ message: "房间号不能为空", type: "error" })
+                return
+            }
             this.init = false
             this.webrtc.onReceive = this.handleReceive
             ElNotification({
@@ -109,18 +137,9 @@ const vm = createApp({
                 syncScene(msg.data)
             }
         },
-        uploadFile(file) {
-            const fileReader = new FileReader();
-            fileReader.readAsDataURL(file.raw);
-            fileReader.onload = () => {
-                panel.target.icon = fileReader.result
-                panel.target.type = "new_target"
-                this.$message({message: "上传素材成功", type: "success"})
-            }
-        },
         uploadMap(file) {
             if (host === 0) {
-                this.$message({message: "您不是主持人，无法上传地图", type: "error"})
+                this.$message({ message: "您不是主持人，无法上传地图", type: "error" })
             } else {
                 const config = {
                     ...this.imgCompressorConfig,
@@ -129,9 +148,9 @@ const vm = createApp({
                         const fileReader = new FileReader();
                         fileReader.readAsDataURL(result);
                         fileReader.onload = () => {
-                            this.$message({message: "上传地图成功", type: "success"})
+                            this.$message({ message: "上传地图成功", type: "success" })
                             const background = game.layer.getChildren()[0];
-                            cc.loader.loadImg(fileReader.result, {isCrossOrigin: false}, function (err, img) {
+                            cc.loader.loadImg(fileReader.result, { isCrossOrigin: false }, function (err, img) {
                                 const texture = new cc.Texture2D();
                                 texture.initWithElement(img);
                                 texture.handleLoadedTexture();
@@ -156,7 +175,7 @@ const vm = createApp({
         },
         changeMap() {
             if (host === 0) {
-                this.$message({message: "您不是主持人，无法更换地图", type: "error"})
+                this.$message({ message: "您不是主持人，无法更换地图", type: "error" })
             } else {
                 const background = game.layer.getChildren()[0];
                 background.setTexture(this.mapSelected);
@@ -172,6 +191,72 @@ const vm = createApp({
                 background.setScale(backgroundScale)
                 this.needUpdate = true
             }
+        },
+        addWaymarkHandler() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法添加场地标记", type: "error" })
+                return
+            }
+            if (this.waymark.texture === null) {
+                this.$message({ message: "请先选择场地标记", type: "error" })
+                return
+            }
+            const size = 4
+            const texture = {
+                type: "url",
+                data: this.waymark.texture
+            }
+            panel.action = {}
+            panel.action.type = "add_waymark"
+            panel.action.data = {
+                size: size,
+                texture: texture
+            }
+            this.action = "addWaymark"
+            this.addWaymarkPlane = true
+            this.$message({ message: "请点击场地选择目标位置", type: "info" })
+        },
+        deleteWaymarkHandler() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法删除场地标记", type: "error" })
+                return
+            }
+            this.action = "deleteWaymark"
+            panel.action = {}
+            panel.action.type = "delete_waymark"
+        },
+        addTargetHandler() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法添加目标", type: "error" })
+                return
+            }
+            if (this.target.texture === null) {
+                this.$message({ message: "请先选择素材", type: "error" })
+                return
+            }
+            const size = this.target.size ? this.target.size : 2
+            const texture = {
+                type: "url",
+                data: this.target.texture
+            }
+            panel.action = {}
+            panel.action.type = "add_target"
+            panel.action.data = {
+                size: size,
+                texture: texture
+            }
+            this.action = "addTarget"
+            this.addTargetPlane = true
+            this.$message({ message: "请点击场地选择目标位置", type: "info" })
+        },
+        deleteTargetHandler() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法删除目标", type: "error" })
+                return
+            }
+            this.action = "deleteTarget"
+            panel.action = {}
+            panel.action.type = "delete_target"
         }
     },
     mounted() {
