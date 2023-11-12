@@ -19,15 +19,20 @@ const vm = createApp({
             init: false,
             texture: {},
             mapSelected: {},
+            mapWidth: null,
             action: "",
             addTargetPlane: false,
             addWaymarkPlane: false,
+            addRangePlane: false,
             target: {
                 size: null,
                 texture: null
             },
             waymark: {
                 texture: null
+            },
+            range: {
+                size: null
             }
         }
     },
@@ -67,18 +72,12 @@ const vm = createApp({
                 this.addWaymarkPlane = false
             },
             deep: true
-        }
-    },
-    watch: {
-        needUpdate() {
-            if (this.host === 1 && this.needUpdate && !this.updating) {
-                this.syncState()
-            }
         },
-        updating() {
-            if (this.host === 1 && this.needUpdate && !this.updating) {
-                this.syncState()
-            }
+        range: {
+            handler() {
+                this.addRangePlane = false
+            },
+            deep: true
         }
     },
     methods: {
@@ -120,15 +119,22 @@ const vm = createApp({
             this.webrtc.leave()
         },
         syncState() {
+            if(this.host !== 1) { 
+                this.needUpdate = false
+                this.updating = false
+                return;
+            }
             this.needUpdate = false
             this.updating = true
             let data = getCurrentData();
-            this.updating = false
-            debugger
             this.webrtc.sendMessage(JSON.stringify({
                 type: "sync",
                 data: data
             }))
+            this.updating = false
+            if (this.needUpdate) {
+                this.syncState();
+            }
         },
         handleReceive(msg) {
             const type = msg.type
@@ -136,6 +142,11 @@ const vm = createApp({
                 this.syncing = true
                 syncScene(msg.data)
             }
+        },
+        clearAction() {
+            this.action = ""
+            panel.action = {}
+            this.$message({ message: "已清除点击行为", type: "success" })
         },
         uploadMap(file) {
             if (host === 0) {
@@ -192,6 +203,15 @@ const vm = createApp({
                 this.needUpdate = true
             }
         },
+        changeMapWidth() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法更改场地宽度", type: "error" })
+            } else {
+                game.mapWidth = this.mapWidth
+                syncScene(getCurrentData())
+                this.$message({ message: "更改场地宽度成功", type: "success" })
+            }
+        },
         addWaymarkHandler() {
             if (host === 0) {
                 this.$message({ message: "您不是主持人，无法添加场地标记", type: "error" })
@@ -224,6 +244,7 @@ const vm = createApp({
             this.action = "deleteWaymark"
             panel.action = {}
             panel.action.type = "delete_waymark"
+            this.$message({ message: "请点击场地标记删除", type: "info" })
         },
         addTargetHandler() {
             if (host === 0) {
@@ -257,6 +278,63 @@ const vm = createApp({
             this.action = "deleteTarget"
             panel.action = {}
             panel.action.type = "delete_target"
+            this.$message({ message: "请点击目标删除", type: "info" })
+        },
+        addRangeHandler() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法添加范围", type: "error" })
+                return
+            }
+            if (this.range.size === null) {
+                this.$message({ message: "请先输入半径", type: "error" })
+                return
+            }
+            const size = this.range.size
+            panel.action = {}
+            panel.action.type = "add_range"
+            panel.action.data = {
+                size: size
+            }
+            this.action = "addRange"
+            this.addRangePlane = true
+            this.$message({ message: "请点击单位选择范围中心", type: "info" })
+        },
+        clearRangeHandler() {
+            if (host === 0) {
+                this.$message({ message: "您不是主持人，无法删除范围", type: "error" })
+                return
+            }
+            this.action = "clearRange"
+            panel.action = {}
+            panel.action.type = "clear_range"
+            this.$message({ message: "请点击单位清除范围", type: "info" })
+        },
+        importFile(file) {
+            let fileReader = new FileReader();
+            fileReader.readAsText(file.raw);
+            fileReader.onload = () => {
+                let data = JSON.parse(fileReader.result);
+                if (data.type === "sync") {
+                    syncScene(data.data)
+                    this.$message({ message: "导入成功", type: "success" })
+                } else {
+                    this.$message({ message: "文件格式错误", type: "error" })
+                }
+            }
+        },
+        exportFile() {
+            let data = getCurrentData();
+            const a = document.createElement("a");
+            const date = new Date();
+            const time = date.getFullYear().toString() + (date.getMonth() + 1).toString().padStart(2, '0') + date.getDate().toString().padStart(2, '0') + date.getHours().toString().padStart(2, '0') + date.getMinutes().toString().padStart(2, '0') + date.getSeconds().toString().padStart(2, '0');
+            a.href = URL.createObjectURL(new Blob([JSON.stringify({
+                type: "sync",
+                data: data
+            })]));
+            a.download = "export-" + time + ".json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
         }
     },
     mounted() {
@@ -283,6 +361,9 @@ const vm = createApp({
         };
         window.updateNeedUpdate = () => {
             this.needUpdate = true;
+            if (this.needUpdate && !this.updating) {
+                this.syncState();
+            }
         }
         window.updateSyncing = () => {
             this.syncing = false;

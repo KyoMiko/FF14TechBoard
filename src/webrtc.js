@@ -391,10 +391,7 @@ export default class WebrtcClient {
                 break;
             case "ice":
                 const iceFrom = data.from;
-                console.log(1);
                 if (this.connectionList[iceFrom]) {
-                    console.log(2)
-                    console.log(data)
                     const connection = this.connectionList[iceFrom].peer;
                     const candidateList = data.sdp;
                     for (const candidate of candidateList) {

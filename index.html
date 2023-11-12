@@ -114,6 +114,7 @@
             <el-tabs type="border-card" style="height: 99.8%;">
                 <el-tab-pane label="战术板" name="techboard">
                     <div>
+                        <el-button @click="clearAction" type="primary" style="margin-bottom: 10px;">清除点击行为</el-button>
                         <el-collapse>
                             <el-collapse-item title="选择场地">
                                 <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
@@ -123,12 +124,9 @@
                                                 v-for="map in texture.background"></el-option>
                                         </el-select>
                                     </el-col>
-                                    <el-col :span="8">
-                                        <el-input placeholder="场地缩放"></el-input>
-                                    </el-col>
                                 </el-row>
 
-                                <el-row justify="center">
+                                <el-row justify="center" style="margin-bottom: 10px;">
                                     <el-col :span="4">
                                         <el-button @click="changeMap" type="primary">更换场地</el-button>
                                     </el-col>
@@ -137,6 +135,18 @@
                                             action="#">
                                             <el-button type="primary">上传场地</el-button>
                                         </el-upload>
+                                    </el-col>
+                                </el-row>
+
+                                <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
+                                    <el-col :span="8">
+                                        <el-input placeholder="场地宽度（默认60m）" v-model="mapWidth" type="number"></el-input>
+                                    </el-col>
+                                </el-row>
+
+                                <el-row justify="center">
+                                    <el-col :span="4">
+                                        <el-button @click="changeMapWidth" type="primary">设置场地宽度</el-button>
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
@@ -150,15 +160,11 @@
                                     </el-col>
                                 </el-row>
                                 <el-row justify="center">
-                                    <el-col :span="4">
-                                        <el-tooltip content="点击按钮后，点击左侧添加场地标记">
-                                            <el-button @click="addWaymarkHandler" type="primary" :plane="action==='addWaymark'&&addWaymarkPlane" :disabled="action==='addWaymark'&&addWaymarkPlane">添加单位</el-button>
-                                        </el-tooltip>
+                                    <el-col :span="5">
+                                        <el-button @click="addWaymarkHandler" type="primary" :plane="action==='addWaymark'&&addWaymarkPlane" :disabled="action==='addWaymark'&&addWaymarkPlane">添加场地单位</el-button>
                                     </el-col>
-                                    <el-col :span="4">
-                                        <el-tooltip content="点击按钮后，点击左侧场地标记删除">
-                                            <el-button @click="deleteWaymarkHandler" type="primary" :plane="action==='deleteWaymark'" :disabled="action==='deleteWaymark'">删除单位</el-button>
-                                        </el-tooltip>
+                                    <el-col :span="5">
+                                        <el-button @click="deleteWaymarkHandler" type="primary" :plane="action==='deleteWaymark'" :disabled="action==='deleteWaymark'">删除场地单位</el-button>
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
@@ -171,24 +177,48 @@
                                         </el-select>
                                     </el-col>
                                     <el-col :span="8">
-                                        <el-input placeholder="单位直径（场地直径60m）" v-model="target.size" type="number"></el-input>
+                                        <el-input placeholder="单位直径" v-model="target.size" type="number"></el-input>
                                     </el-col>
                                 </el-row>
                                 <el-row justify="center">
                                     <el-col :span="4">
-                                        <el-tooltip content="点击按钮后，点击左侧添加单位">
-                                            <el-button @click="addTargetHandler" type="primary" :plane="action==='addTarget'&&addTargetPlane" :disabled="action==='addTarget'&&addTargetPlane">添加单位</el-button>
-                                        </el-tooltip>
+                                        <el-button @click="addTargetHandler" type="primary" :plane="action==='addTarget'&&addTargetPlane" :disabled="action==='addTarget'&&addTargetPlane">添加单位</el-button>
                                     </el-col>
                                     <el-col :span="4">
-                                        <el-tooltip content="点击按钮后，点击左侧单位删除">
-                                            <el-button @click="deleteTargetHandler" type="primary" :plane="action==='deleteTarget'" :disabled="action==='deleteTarget'">删除单位</el-button>
-                                        </el-tooltip>
+                                        <el-button @click="deleteTargetHandler" type="primary" :plane="action==='deleteTarget'" :disabled="action==='deleteTarget'">删除单位</el-button>
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
                             <el-collapse-item title="游戏机制">
                                 待开发
+                            </el-collapse-item>
+                            <el-collapse-item title="范围参考">
+                                <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
+                                    <el-col :span="8">
+                                        <el-input placeholder="半径" v-model="range.size" type="number"></el-input>
+                                    </el-col>
+                                </el-row>
+                                <el-row justify="center">
+                                    <el-col :span="4">
+                                        <el-button @click="addRangeHandler" type="primary" :plane="action==='addRange'&&addRangePlane" :disabled="action==='addRange'&&addRangePlane">添加范围</el-button>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-button @click="clearRangeHandler" type="primary" :plane="action==='clearRange'" :disabled="action==='clearRange'">清除范围</el-button>
+                                    </el-col>
+                                </el-row>
+                            </el-collapse-item>
+                            <el-collapse-item title="导入导出">
+                                <el-row justify="center">
+                                    <el-col :span="4">
+                                        <el-upload :auto-upload="false" :on-change="importFile" :show-file-list="false"
+                                            action="#">
+                                            <el-button type="primary">导入文件</el-button>
+                                        </el-upload>
+                                    </el-col>
+                                    <el-col :span="4">
+                                        <el-button @click="exportFile" type="primary">导出文件</el-button>
+                                    </el-col>
+                                </el-row>
                             </el-collapse-item>
                         </el-collapse>
                     </div>

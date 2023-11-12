@@ -59,170 +59,145 @@ const localLayer = cc.Layer.extend({
 
         window.panel.action = {};
         window.game.layer = this;
-        window.game.targetList = {};
-        window.game.mechanismList = {};
         window.game.playerList = {};
+        window.game.targetList = {};
+        window.game.rangeList = {};
+        window.game.mechanismList = {};
+        window.game.childrenList = {};
+        window.game.mapWidth = 60;
 
 
-        window.game.iconSize = backgroundSize.width / 30;
+        window.game.iconSize = backgroundSize.width * 2 / game.mapWidth;
 
-        //初始化玩家
-        let tag = Math.floor(Math.random() * 100000);
-        let mt = new cc.Sprite(res.players.warrior);
-        mt.attr({
-            x: size.width / 2 - game.iconSize * 1.5 - 10,
-            y: size.height / 3
-        })
-        mt.setTag(tag)
-        mt.setUserData({
-            type: "tank",
-            texture: {
-                type: "url",
-                data: res.players.warrior
+        const playerList = [{
+            position: {
+                x: size.width / 2 - game.iconSize * 1.5 - 10,
+                y: size.height / 3
             },
-            size: 2
-        })
-
-        let mtSize = mt.getBoundingBox();
-        let scale = game.iconSize / mtSize.width;
-        mt.setScale(scale)
-
-        this.addChild(mt, 0)
-        game.playerList[tag] = mt
-
-        tag = Math.floor(Math.random() * 100000)
-        let st = new cc.Sprite(res.players.paladin);
-        st.attr({
-            x: size.width / 2 - 5 - game.iconSize / 2,
-            y: size.height / 3
-        })
-        st.setTag(tag)
-        st.setUserData({
-            type: "tank",
-            texture: {
-                type: "url",
-                data: res.players.paladin
+            userData: {
+                type: "player",
+                data: {
+                    type: "tank"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.warrior
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 - game.iconSize * 0.5 - 5,
+                y: size.height / 3
             },
-            size: 2
-        })
-        st.setScale(scale)
-        this.addChild(st, 0)
-        game.playerList[tag] = st
-
-        tag = Math.floor(Math.random() * 100000)
-        let h1 = new cc.Sprite(res.players.whitemage);
-        h1.attr({
-            x: size.width / 2 + game.iconSize / 2 + 5,
-            y: size.height / 3
-        })
-        h1.setTag(tag)
-        h1.setUserData({
-            type: "healer",
-            texture: {
-                type: "url",
-                data: res.players.whitemage
+            userData: {
+                type: "player",
+                data: {
+                    type: "tank"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.paladin
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 + game.iconSize / 2 + 5,
+                y: size.height / 3
             },
-            size: 2
-        })
-        h1.setScale(scale)
-        this.addChild(h1, 0)
-        game.playerList[tag] = h1
-
-        tag = Math.floor(Math.random() * 100000)
-        let h2 = new cc.Sprite(res.players.scholar);
-        h2.attr({
-            x: size.width / 2 + game.iconSize * 1.5 + 10,
-            y: size.height / 3
-        })
-        h2.setTag(tag)
-        h2.setUserData({
-            type: "healer",
-            texture: {
-                type: "url",
-                data: res.players.scholar
+            userData: {
+                type: "player",
+                data: {
+                    type: "healer"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.whitemage
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 + game.iconSize * 1.5 + 10,
+                y: size.height / 3
             },
-            size: 2
-        })
-        h2.setScale(scale)
-        this.addChild(h2, 0)
-        game.playerList[tag] = h2
-
-        tag = Math.floor(Math.random() * 100000)
-        let d1 = new cc.Sprite(res.players.dragoon);
-        d1.attr({
-            x: size.width / 2 - game.iconSize * 1.5 - 10,
-            y: size.height / 3 - game.iconSize - 5
-        })
-        d1.setTag(tag)
-        d1.setUserData({
-            type: "dps",
-            texture: {
-                type: "url",
-                data: res.players.dragoon
+            userData: {
+                type: "player",
+                data: {
+                    type: "healer"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.scholar
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 - game.iconSize * 1.5 - 10,
+                y: size.height / 3 - game.iconSize - 5
             },
-            size: 2
-        })
-        d1.setScale(scale)
-        this.addChild(d1, 0)
-        game.playerList[tag] = d1
-
-        tag = Math.floor(Math.random() * 100000)
-        let d2 = new cc.Sprite(res.players.samurai);
-        d2.attr({
-            x: size.width / 2 - 5 - game.iconSize / 2,
-            y: size.height / 3 - game.iconSize - 5
-        })
-        d2.setTag(tag)
-        d2.setUserData({
-            type: "dps",
-            texture: {
-                type: "url",
-                data: res.players.samurai
+            userData: {
+                type: "player",
+                data: {
+                    type: "dps"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.dragoon
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 - game.iconSize * 0.5 - 5,
+                y: size.height / 3 - game.iconSize - 5
             },
-            size: 2
-        })
-        d2.setScale(scale)
-        this.addChild(d2, 0)
-        game.playerList[tag] = d2
-
-        tag = Math.floor(Math.random() * 100000)
-        let d3 = new cc.Sprite(res.players.bard);
-        d3.attr({
-            x: size.width / 2 + game.iconSize / 2 + 5,
-            y: size.height / 3 - game.iconSize - 5
-        })
-        d3.setTag(tag)
-        d3.setUserData({
-            type: "dps",
-            texture: {
-                type: "url",
-                data: res.players.bard
+            userData: {
+                type: "player",
+                data: {
+                    type: "dps"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.samurai
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 + game.iconSize / 2 + 5,
+                y: size.height / 3 - game.iconSize - 5
             },
-            size: 2
-        })
-        d3.setScale(scale)
-        this.addChild(d3, 0)
-        game.playerList[tag] = d3
-
-        tag = Math.floor(Math.random() * 100000)
-        let d4 = new cc.Sprite();
-        d4.setTexture(res.players.summoner)
-        d4.attr({
-            x: size.width / 2 + game.iconSize * 1.5 + 10,
-            y: size.height / 3 - game.iconSize - 5
-        })
-        d4.setTag(tag)
-        d4.setUserData({
-            type: "dps",
-            texture: {
-                type: "url",
-                data: res.players.summoner
+            userData: {
+                type: "player",
+                data: {
+                    type: "dps"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.bard
+                },
+                size: 2
+            }
+        }, {
+            position: {
+                x: size.width / 2 + game.iconSize * 1.5 + 10,
+                y: size.height / 3 - game.iconSize - 5
             },
-            size: 2
-        })
-        d4.setScale(scale)
-        this.addChild(d4, 0)
-        game.playerList[tag] = d4
+            userData: {
+                type: "player",
+                data: {
+                    type: "dps"
+                },
+                texture: {
+                    type: "url",
+                    data: res.players.summoner
+                },
+                size: 2
+            }
+        }]
 
         //初始化事件
         window.listener.touchEmptyListener = cc.EventListener.create({
@@ -233,10 +208,6 @@ const localLayer = cc.Layer.extend({
                 }
                 const type = panel.action.type;
                 if (type === "add_waymark" || type === "add_target") {
-                    const temp = panel.action.type === "add_waymark" ? "waymark" : "target";
-                    const userData = {
-                        type: temp,
-                    }
                     const data = panel.action.data;
                     const touchLocation = touch.getLocation();
 
@@ -247,12 +218,19 @@ const localLayer = cc.Layer.extend({
                         y: touchLocation.y
                     })
                     target.setTag(tag)
-                    game.layer.addChild(target, 0)
+                    game.layer.addChild(target, 1)
                     cc.eventManager.addListener(listener.moveItemListener.clone(), target)
                     game.targetList[tag] = target
 
                     const texture = data.texture;
                     const type = texture.type;
+                    const temp = panel.action.type === "add_waymark" ? "waymark" : "target";
+                    const userData = {
+                        type: temp,
+                    }
+                    if (temp === "target") {
+                        game.childrenList[tag] = []
+                    }
                     if (type === "base64") {
                         cc.loader.loadImg(texture.data, { isCrossOrigin: false }, function (err, img) {
                             const texture = new cc.Texture2D();
@@ -324,40 +302,110 @@ const localLayer = cc.Layer.extend({
 
                 listener.movingDistance += delta.x * delta.x + delta.y * delta.y;
 
+                const children = game.childrenList[target.getTag()]
+                for (const child of children) {
+                    child.x += delta.x;
+                    child.y += delta.y;
+                }
+
                 game.calculateMechanism()
                 updateNeedUpdate()
             },
             onTouchEnded: function (touch, event) {
                 if (listener.movingDistance < 2) {
-                    if (panel.action.type === "mechanism") {
-                        const data = panel.action.data;
-                        const target = event.getCurrentTarget();
-                        const tag = Math.floor(Math.random() * 100000)
-                        let mechanism = new cc.Sprite();
-                        mechanism.attr({
-                            x: 0,
-                            y: 0
-                        })
-                        mechanism.setTag(tag)
-                        mechanism.setUserData(data.userData)
-                        target.addChild(mechanism, -1)
-                        game.mechanismList[tag] = mechanism;
-                        updateNeedUpdate()
+                    const target = event.getCurrentTarget();
+                    const userData = target.getUserData();
+                    switch (panel.action.type) {
+                        case "delete_waymark":
+                            if (userData.type === "waymark") {
+                                const tag = target.getTag();
+                                target.removeFromParent()
+                                delete game.targetList[tag]
+                                updateNeedUpdate()
+                            }
+                            break;
+                        case "delete_target":
+                            if (userData.type === "target") {
+                                const tag = target.getTag();
+                                target.removeFromParent()
+                                delete game.targetList[tag]
+                                updateNeedUpdate()
+                            }
+                            break;
+                        case "add_range":
+                            if (userData.type === "player" || userData.type === "target") {
+                                let draw = new cc.DrawNode();
+                                const rangeTag = Math.floor(Math.random() * 100000)
+                                const size = panel.action.data.size
+                                const radius = panel.action.data.size / 2 * game.iconSize;
+                                const count = size * 2 * 10;
+                                draw.drawCircle(target.getPosition(), radius, 360, count, false, 3, cc.color(255, 255, 255, 255));
+                                draw.setTag(rangeTag)
+                                draw.setUserData({
+                                    type: "range",
+                                    size: size
+                                })
+                                game.layer.addChild(draw, 0);
+                                game.childrenList[target.getTag()].push(draw);
+                                game.rangeList[rangeTag] = draw;
+                                updateNeedUpdate()
+                            }
+                            break;
+                        case "clear_range":
+                            if (userData.type === "player" || userData.type === "target") {
+                                const children = game.childrenList[target.getTag()]
+                                const length = children.length;
+                                for (let i = 0; i < length; i++) {
+                                    const child = children.pop();
+                                    const tag = child.getTag();
+                                    if (game.rangeList[tag]) {
+                                        child.removeFromParent()
+                                        delete game.rangeList[tag]
+                                    } else {
+                                        children.push(child)
+                                    }
+                                }
+                                updateNeedUpdate()
+                            }
+                            break
+                        case "add_mechanism":
+                            const data = panel.action.data;
+                            const tag = Math.floor(Math.random() * 100000)
+                            let mechanism = new cc.Sprite();
+                            mechanism.attr({
+                                x: 0,
+                                y: 0
+                            })
+                            mechanism.setTag(tag)
+                            mechanism.setUserData(data.userData)
+                            target.addChild(mechanism, -1)
+                            game.mechanismList[tag] = mechanism;
+                            updateNeedUpdate()
+                            break;
                     }
                 }
             }
         })
 
-        cc.eventManager.addListener(listener.touchEmptyListener.clone(), background)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), mt)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), st)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), h1)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), h2)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), d1)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), d2)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), d3)
-        cc.eventManager.addListener(listener.moveItemListener.clone(), d4)
+        //初始化玩家
+        for (const player of playerList) {
+            const tag = Math.floor(Math.random() * 100000)
+            let playerSprite = new cc.Sprite(player.userData.texture.data);
+            playerSprite.attr({
+                x: player.position.x,
+                y: player.position.y
+            })
+            playerSprite.setTag(tag)
+            playerSprite.setUserData(player.userData)
+            this.addChild(playerSprite, 2)
+            game.playerList[tag] = playerSprite
+            game.childrenList[tag] = [];
+            const size = player.userData.size;
+            playerSprite.setScale(game.iconSize * size / 2 / playerSprite.getBoundingBox().width)
+            cc.eventManager.addListener(listener.moveItemListener.clone(), playerSprite)
+        }
 
+        cc.eventManager.addListener(listener.touchEmptyListener.clone(), background)
         return true;
     }
 });
