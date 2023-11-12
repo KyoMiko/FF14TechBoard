@@ -16,7 +16,7 @@ const vm = createApp({
             needUpdate: false,
             updating: false,
             syncing: false,
-            init: false,
+            collapse: [],
             texture: {},
             mapSelected: {},
             mapWidth: null,
@@ -105,7 +105,6 @@ const vm = createApp({
                 this.$message({ message: "房间号不能为空", type: "error" })
                 return
             }
-            this.init = false
             this.webrtc.onReceive = this.handleReceive
             ElNotification({
                 title: '尝试加入',
@@ -310,6 +309,10 @@ const vm = createApp({
             this.$message({ message: "请点击单位清除范围", type: "info" })
         },
         importFile(file) {
+            if(host === 0) {
+                this.$message({ message: "您不是主持人，无法导入数据", type: "error" })
+                return
+            }
             let fileReader = new FileReader();
             fileReader.readAsText(file.raw);
             fileReader.onload = () => {

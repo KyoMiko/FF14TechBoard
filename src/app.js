@@ -303,9 +303,11 @@ const localLayer = cc.Layer.extend({
                 listener.movingDistance += delta.x * delta.x + delta.y * delta.y;
 
                 const children = game.childrenList[target.getTag()]
-                for (const child of children) {
-                    child.x += delta.x;
-                    child.y += delta.y;
+                if (children) {
+                    for (const child of children) {
+                        child.x += delta.x;
+                        child.y += delta.y;
+                    }
                 }
 
                 game.calculateMechanism()

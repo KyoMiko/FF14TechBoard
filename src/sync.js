@@ -168,6 +168,7 @@ export function syncScene(data) {
         }
         game.calculateMechanism()
         updateSyncing()
+        updateNeedUpdate()
     })
 }
 

@@ -115,8 +115,8 @@
                 <el-tab-pane label="战术板" name="techboard">
                     <div>
                         <el-button @click="clearAction" type="primary" style="margin-bottom: 10px;">清除点击行为</el-button>
-                        <el-collapse>
-                            <el-collapse-item title="选择场地">
+                        <el-collapse v-model="collapse">
+                            <el-collapse-item title="选择场地" name="map">
                                 <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
                                     <el-col :span="8">
                                         <el-select v-model="mapSelected">
@@ -150,7 +150,7 @@
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
-                            <el-collapse-item title="场地标记">
+                            <el-collapse-item title="场地标记" name="waymark">
                                 <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
                                     <el-col :span="8">
                                         <el-select v-model="waymark.texture">
@@ -168,7 +168,7 @@
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
-                            <el-collapse-item title="游戏单位">
+                            <el-collapse-item title="游戏单位" name="target">
                                 <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
                                     <el-col :span="8">
                                         <el-select v-model="target.texture">
@@ -189,10 +189,10 @@
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
-                            <el-collapse-item title="游戏机制">
+                            <el-collapse-item title="游戏机制" name="mechenisam">
                                 待开发
                             </el-collapse-item>
-                            <el-collapse-item title="范围参考">
+                            <el-collapse-item title="范围参考" name="range">
                                 <el-row justify="center" :gutter="5" style="margin-bottom: 10px;">
                                     <el-col :span="8">
                                         <el-input placeholder="半径" v-model="range.size" type="number"></el-input>
@@ -207,7 +207,7 @@
                                     </el-col>
                                 </el-row>
                             </el-collapse-item>
-                            <el-collapse-item title="导入导出">
+                            <el-collapse-item title="导入导出" name="importExport">
                                 <el-row justify="center">
                                     <el-col :span="4">
                                         <el-upload :auto-upload="false" :on-change="importFile" :show-file-list="false"

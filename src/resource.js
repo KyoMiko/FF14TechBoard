@@ -160,14 +160,19 @@ let texture = {
         }
     ],
     target:[
-
+        {
+            key: "target",
+            label: "目标",
+            path: "res/target/target.png"
+        }
     ]
 }
 
 let res = {
     background: {},
     players: {},
-    waymark: {}
+    waymark: {},
+    target: {}
 };
 
 let g_resources = [];
