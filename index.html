@@ -107,6 +107,10 @@
         .input {
             max-width: 10vw;
         }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 
     <script src="//unpkg.com/vue@3"></script>
@@ -131,10 +135,11 @@
                     style="position: absolute; z-index: 1;top: 8px;right: 10px;">{{mode.text}}
             </el-tag>
         </el-tooltip>
-        <el-tabs class="tabs" style="height: 99.8%;overflow: auto;" type="border-card">
+        <el-tabs class="tabs" style="height: 99.8%;" type="border-card">
             <el-tab-pane label="战术板" name="techboard">
-                <div>
-                    <el-button @click="clearAction" style="margin-bottom: 10px;" type="primary">清除点击行为</el-button>
+                <div style="height: calc(100vh - 70px);overflow: auto">
+                    <el-button @click="clearAction" style="margin-bottom: 10px;" type="primary">清除点击行为
+                    </el-button>
                     <el-collapse v-model="collapse">
                         <el-collapse-item name="map" title="选择场地">
                             <el-row justify="center" style="margin-bottom: 10px;">
@@ -149,12 +154,14 @@
                             <el-row :gutter="20" justify="center" style="margin-bottom: 10px;">
                                 <el-col :span="12">
                                     <div class="left">
-                                        <el-button @click="changeMap" class="input" type="primary">更换场地</el-button>
+                                        <el-button @click="changeMap" class="input" type="primary">更换场地
+                                        </el-button>
                                     </div>
                                 </el-col>
                                 <el-col :span="12">
                                     <div class="right">
-                                        <el-upload :auto-upload="false" :on-change="uploadMap" :show-file-list="false"
+                                        <el-upload :auto-upload="false" :on-change="uploadMap"
+                                                   :show-file-list="false"
                                                    action="#">
                                             <el-button class="input" type="primary">上传场地</el-button>
                                         </el-upload>
@@ -235,7 +242,8 @@
                                 </el-col>
                                 <el-col :span="12">
                                     <div class="right">
-                                        <el-button :disabled="action==='deleteTarget'" :plane="action==='deleteTarget'"
+                                        <el-button :disabled="action==='deleteTarget'"
+                                                   :plane="action==='deleteTarget'"
                                                    @click="deleteTargetHandler" type="primary">删除单位
                                         </el-button>
                                     </div>
@@ -277,7 +285,8 @@
                             <el-row :gutter="20" justify="center">
                                 <el-col :span="12">
                                     <div class="left">
-                                        <el-upload :auto-upload="false" :on-change="importFile" :show-file-list="false"
+                                        <el-upload :auto-upload="false" :on-change="importFile"
+                                                   :show-file-list="false"
                                                    action="#">
                                             <el-button type="primary">导入文件</el-button>
                                         </el-upload>
@@ -294,8 +303,17 @@
                 </div>
             </el-tab-pane>
             <el-tab-pane label="联机" name="online">
-                <el-input disabled placeholder="房间号" v-model="selfNum"></el-input>
-                <el-input placeholder="请输入对方的房间号" v-model="roomNum"></el-input>
+                <el-row justify="center" style="margin-bottom: 10px;">
+                    <el-col :span="12">
+                        <el-input disabled placeholder="房间号" v-model="selfNum"></el-input>
+                    </el-col>
+                </el-row>
+
+                <el-row justify="center" style="margin-bottom: 10px;">
+                    <el-col :span="12">
+                        <el-input placeholder="请输入对方的房间号" v-model="roomNum"></el-input>
+                    </el-col>
+                </el-row>
                 <el-button @click="createConnection" v-if="webrtc === null">上线</el-button>
                 <el-button @click="releaseConnection" v-if="webrtc !== null">离线</el-button>
                 <el-button :disabled="webrtc === null || host !== -1" @click="joinConnection">加入</el-button>
